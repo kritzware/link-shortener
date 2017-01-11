@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Link Shortener</title>
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+</head>
+<body>
+
+<form id="shorten">
+	Enter URL to shorten
+	<input type="text" name="link" placeholder="Paste link here..">
+	<input type="submit" value="Submit">
+	<span style="color:red;display:none;" id="invalid-url">Invalid URL</span>
+	<span id="shortened-link"></span>
+</form>
+
+<script>
+$('#shorten').submit(function(e) {
+	e.preventDefault();
+	var link = $('#shorten').children().val()
+	var regex = new RegExp(/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi)
+	if(!link.match(regex)) {
+		$('#invalid-url').css('display', 'block')
+		return
+	}
+	$('#invalid-url').css('display', 'none')
+
+	var xhr = new XMLHttpRequest()
+	xhr.open("POST", "http://localhost:7821/link/")
+	xhr.setRequestHeader("Content-type", "application/json")
+	xhr.onreadystatechange = function() {
+		if(this.readyState === 4 && this.status === 200) {
+			var res = JSON.parse(this.responseText)
+			$('<a href="http://localhost:7821/s/'+res.Token+'" target="_blank">link.kritzware.com/s/'+res.Token+'</a>').appendTo('#shortened-link')
+		}
+	}
+	xhr.send(JSON.stringify({link: link}))
+
+})
+</script>
+
+</body>
+</html>
